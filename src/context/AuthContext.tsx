@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, ReactNode, useEffect, useState } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -11,7 +11,7 @@ import axios from 'axios'
 import authConfig from 'src/configs/auth'
 
 // ** Types
-import { AuthValuesType, RegisterParams, LoginParams, ErrCallbackType, UserDataType } from './types'
+import { AuthValuesType, ErrCallbackType, LoginParams, RegisterParams, UserDataType } from './types'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -73,23 +73,37 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
+    const postData = new FormData()
+    Object.entries(params).map(([key, value]) => postData.append(key, value))
+
     axios
-      .post(authConfig.loginEndpoint, params)
+      .post(`https://ipa4.metakhodro.ir/v2/Auth/User/Login/Password`, postData)
       .then(async response => {
-        params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
-        const returnUrl = router.query.returnUrl
-
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
-
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-
-        router.replace(redirectURL as string)
+        console.log('response')
       })
 
       .catch(err => {
+        console.log(err)
+        if (errorCallback) errorCallback(err)
+      })
+      // axios
+      //   .post(authConfig.loginEndpoint, params)
+      //   .then(async response => {
+      //     params.rememberMe
+      //       ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
+      //       : null
+      //     const returnUrl = router.query.returnUrl
+
+      //     setUser({ ...response.data.userData })
+      //     params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
+
+      //     const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+
+      //     router.replace(redirectURL as string)
+      //   })
+
+      .catch(err => {
+        console.log(err)
         if (errorCallback) errorCallback(err)
       })
   }
@@ -108,7 +122,7 @@ const AuthProvider = ({ children }: Props) => {
         if (res.data.error) {
           if (errorCallback) errorCallback(res.data.error)
         } else {
-          handleLogin({ email: params.email, password: params.password })
+          // handleLogin({ email: params.email, password: params.password })
         }
       })
       .catch((err: { [key: string]: string }) => (errorCallback ? errorCallback(err) : null))
