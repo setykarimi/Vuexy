@@ -38,11 +38,6 @@ import * as yup from 'yup'
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
 
-interface State {
-  password: string
-  showPassword: boolean
-}
-
 // ** Styled Components
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '25rem' }
@@ -91,8 +86,6 @@ const LoginV1 = () => {
   const onSubmit = (data: FormData) => {
     const { email, password } = data
 
-    console.log('email', email)
-    console.log('password', password)
     auth.login({ email, password }, () => {
       setError('email', {
         type: 'manual',
@@ -229,5 +222,7 @@ const LoginV1 = () => {
 }
 
 LoginV1.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
+
+LoginV1.guestGuard = true
 
 export default LoginV1
