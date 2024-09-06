@@ -22,6 +22,7 @@
     "incremental": true,
     "paths": {
       "@/comps/*": ["./src/pages/components/*"],
+      "@/pages/*": ["./src/pages/pages/*"],
       "apexcharts": [
         "./node_modules/apexcharts-clevision"
       ],
