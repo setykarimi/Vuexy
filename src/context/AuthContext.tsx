@@ -11,6 +11,7 @@ import axios from 'axios'
 import authConfig from 'src/configs/auth'
 
 // ** Types
+import { httpService } from 'src/configs/http-service'
 import { AuthValuesType, ErrCallbackType, LoginParams, RegisterParams, UserDataType } from './types'
 
 // ** Defaults
@@ -76,31 +77,42 @@ const AuthProvider = ({ children }: Props) => {
     const postData = new FormData()
     Object.entries(params).map(([key, value]) => postData.append(key, value))
 
-    axios
-      .post(`https://ipa4.metakhodro.ir/v2/Auth/User/Login/Password`, postData)
+    // axios
+    //   .post(`https://ipa4.metakhodro.ir/v2/Auth/User/Login/Password`, postData)
+    //   .then(async response => {
+    //     console.log('response')
+    //   })
+
+    //   .catch(err => {
+    //     console.log(err)
+    //     if (errorCallback) errorCallback(err)
+    //   })
+    httpService
+      .post(authConfig.loginEndpoint, postData)
       .then(async response => {
-        console.log('response')
+        const { data } = response
+        console.log('response', response.data)
+
+        window.localStorage.setItem(authConfig.storageTokenKeyName, data.Authorization)
+        const returnUrl = router.query.returnUrl
+
+        const userData = {
+          id: 1,
+          role: data.roles[0] == 'OperationsDirector' ? 'admin' : 'client',
+          fullName: 'Sety',
+          username: 'sety',
+          email: 'admin@vuexy.com',
+          password: '123'
+        }
+
+        setUser(userData)
+        window.localStorage.setItem('userData', JSON.stringify(userData))
+
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        // {"id":1,"role":"admin","fullName":"John Doe","username":"johndoe","email":"admin@vuexy.com"}
+
+        router.replace(redirectURL as string)
       })
-
-      .catch(err => {
-        console.log(err)
-        if (errorCallback) errorCallback(err)
-      })
-      // axios
-      //   .post(authConfig.loginEndpoint, params)
-      //   .then(async response => {
-      //     params.rememberMe
-      //       ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-      //       : null
-      //     const returnUrl = router.query.returnUrl
-
-      //     setUser({ ...response.data.userData })
-      //     params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
-
-      //     const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-
-      //     router.replace(redirectURL as string)
-      //   })
 
       .catch(err => {
         console.log(err)
