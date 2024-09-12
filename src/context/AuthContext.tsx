@@ -42,28 +42,10 @@ const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
-      if (storedToken) {
-        // setLoading(true)
-        // await axios
-        //   .get(authConfig.meEndpoint, {
-        //     headers: {
-        //       Authorization: storedToken
-        //     }
-        //   })
-        //   .then(async response => {
-        //     setLoading(false)
-        //     setUser({ ...response.data.userData })
-        //   })
-        //   .catch(() => {
-        //     localStorage.removeItem('userData')
-        //     localStorage.removeItem('refreshToken')
-        //     localStorage.removeItem('accessToken')
-        //     setUser(null)
-        //     setLoading(false)
-        //     if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
-        //       router.replace('/login')
-        //     }
-        //   })
+      const userData = window.localStorage.getItem('userData')
+      if (storedToken && userData) {
+        setLoading(false)
+        setUser(JSON.parse(userData))
       } else {
         setLoading(false)
       }
@@ -75,18 +57,8 @@ const AuthProvider = ({ children }: Props) => {
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
     const postData = new FormData()
-    Object.entries(params).map(([key, value]) => postData.append(key, value))
+    Object.entries(params).map(([key, value]) => postData.append(key.toString(), value as string))
 
-    // axios
-    //   .post(`https://ipa4.metakhodro.ir/v2/Auth/User/Login/Password`, postData)
-    //   .then(async response => {
-    //     console.log('response')
-    //   })
-
-    //   .catch(err => {
-    //     console.log(err)
-    //     if (errorCallback) errorCallback(err)
-    //   })
     httpService
       .post(authConfig.loginEndpoint, postData)
       .then(async response => {
